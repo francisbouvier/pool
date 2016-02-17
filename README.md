@@ -31,10 +31,11 @@ p := pool.New(concurrency)
 for _, url := range urls {
 	p.Add() // Must be outside goroutines
 	go func(url string) {
-		defer p.Done()
 		// Your business logic
-		http.Get(url)
+		_, err := http.Get(url)
+		p.Done(err)
 	}(url)
 }
 p.Wait()
+p.Error() // to check errors
 ```
