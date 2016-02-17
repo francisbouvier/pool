@@ -29,7 +29,7 @@ urls := []string{
 concurrency := 2
 p := pool.New(concurrency)
 for _, url := range urls {
-	p.Add()
+	p.Add() // Must be outside goroutines
 	go func(url string) {
 		defer p.Done()
 		// Your business logic

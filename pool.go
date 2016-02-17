@@ -4,6 +4,7 @@ import "sync"
 
 type Pool struct {
 	group *sync.WaitGroup
+	mut   *sync.RWMutex
 	queue chan bool
 	size  int
 }
@@ -11,6 +12,7 @@ type Pool struct {
 func New(concurrency int) Pool {
 	p := Pool{
 		group: &sync.WaitGroup{},
+		mut:   &sync.RWMutex{},
 		queue: make(chan bool, concurrency),
 	}
 	return p
@@ -18,7 +20,9 @@ func New(concurrency int) Pool {
 
 func (p Pool) Add() {
 	p.queue <- true
+	p.mut.Lock()
 	p.size += 1
+	defer p.mut.Unlock()
 	p.group.Add(1)
 }
 
@@ -28,6 +32,8 @@ func (p Pool) Done() {
 }
 
 func (p Pool) Size() int {
+	p.mut.RLock()
+	defer p.mut.RUnlock()
 	return p.size
 }
 
